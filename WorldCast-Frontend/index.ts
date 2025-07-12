@@ -7,4 +7,4 @@
 // @ts-nocheck TODO remove when fixed
 
 // Import main functionality
-import './src/main.js';
+import './src/main.ts';

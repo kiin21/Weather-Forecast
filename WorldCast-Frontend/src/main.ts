@@ -8,6 +8,7 @@ import { createLoadingAnimation, updateLoadingMessage } from './components/Loadi
 import { createCurrentWeatherComponent, createForecastComponent } from './components/WeatherComponents.js';
 import { initResizablePanel } from './components/ResizablePanel.js';
 import { toggleDescription, sleep } from './utils/textUtils.js';
+import { WeatherData } from './types/weather.js';
 
 let map: google.maps.Map;
 let marker: google.maps.Marker;
@@ -121,12 +122,30 @@ function geocode(request: google.maps.GeocoderRequest): void {
           { text: "Finalizing Data", subtext: "Preparing your weather report..." }
         ];
 
+        let receiveBasicResponse: boolean = false;
+        let currentWeatherShown = false;
+        let forecastShown = false;
+
         try {
           while (true) {
-            const data = await fetchWeatherData(lat.toString(), lng.toString());
+            // Fix: Remove .then() - it's incorrect with await
+            const data: WeatherData = await fetchWeatherData(lat.toString(), lng.toString());
 
-            if (checkCompleteResponse(data)) {
-              // Clear previous content
+            // Check if data exists before using it
+            if (!data) {
+              console.log("No data received, retrying...");
+              pollCount++;
+              const messageIndex = Math.min(pollCount - 1, loadingMessages.length - 1);
+              updateLoadingMessage(loadingAnimation, loadingMessages[messageIndex].text, loadingMessages[messageIndex].subtext);
+              await sleep(2000);
+              continue;
+            }
+
+            receiveBasicResponse = true;
+
+            // Show weather data immediately when available
+            if (!currentWeatherShown && (data.current || data.location)) {
+              // Clear loading animation and set up the panel
               weatherContent.innerHTML = '';
 
               // Add close button
@@ -138,28 +157,56 @@ function geocode(request: google.maps.GeocoderRequest): void {
               });
               weatherContent.appendChild(closeButton);
 
-              // Create and append current weather component
-              const currentWeatherComponent = createCurrentWeatherComponent(data.current, data.location);
-              weatherContent.appendChild(currentWeatherComponent);
-
-              // Create and append forecast component
-              const forecastComponent = createForecastComponent(data.forecast);
-              weatherContent.appendChild(forecastComponent);
-
-              break; // Exit the loop when complete
+              currentWeatherShown = true;
             }
 
-            // Update loading message based on poll count
+            // Add or update current weather component if available
+            if (data.current && data.location) {
+              const existingCurrent = weatherContent.querySelector('.current-weather');
+              const currentWeatherComponent = createCurrentWeatherComponent(data.current, data.location);
+
+              if (existingCurrent) {
+                existingCurrent.replaceWith(currentWeatherComponent);
+              } else {
+                weatherContent.appendChild(currentWeatherComponent);
+              }
+            }
+
+            // Add or update forecast component if available
+            if (data.forecast) {
+              const existingForecast = weatherContent.querySelector('.forecast');
+              const forecastComponent = createForecastComponent(data.forecast);
+
+              if (existingForecast) {
+                existingForecast.replaceWith(forecastComponent);
+              } else {
+                weatherContent.appendChild(forecastComponent);
+                forecastShown = true;
+              }
+            }
+
+            // Check if we have complete response
+            if (checkCompleteResponse(data)) {
+              console.log("Complete weather data received");
+              break;
+            }
+
+            // Update loading message only if needed
             pollCount++;
             const messageIndex = Math.min(pollCount - 1, loadingMessages.length - 1);
-            updateLoadingMessage(loadingAnimation, loadingMessages[messageIndex].text, loadingMessages[messageIndex].subtext);
 
-            console.log("Checking failed response, retrying...");
+            // Only show loading updates if we haven't shown the basic weather yet
+            if (!currentWeatherShown && loadingAnimation.parentNode) {
+              updateLoadingMessage(loadingAnimation, loadingMessages[messageIndex].text, loadingMessages[messageIndex].subtext);
+            }
+
+            console.log("Partial data received, continuing to poll for complete response...");
 
             // Wait 2 seconds before next poll
             await sleep(2000);
           }
         } catch (error: any) {
+          console.error("Weather data fetch error:", error);
           weatherContent.innerHTML = `
             <div style="
               background: #ff7675; 
