@@ -1,0 +1,35 @@
+<!doctype html>
+<!--
+ @license
+ Copyright 2019 Google LLC. All Rights Reserved.
+ SPDX-License-Identifier: Apache-2.0
+-->
+<html>
+
+<head>
+  <title>Geocoding Service</title>
+
+  <link rel="stylesheet" type="text/css" href="./style.css" />
+  <script type="module" src="./index.ts"></script>
+</head>
+
+<body>
+  <div id="app-container">
+    <div id="map-container">
+      <div id="map"></div>
+    </div>
+    <div id="weather-panel" class="weather-panel-hidden">
+      <div id="weather-content"></div>
+    </div>
+  </div>
+
+  <!-- 
+      Using async loading for optimal performance as recommended by Google Maps API
+      See: https://developers.google.com/maps/documentation/javascript/load-maps-js-api
+      -->
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly&loading=async"
+    defer></script>
+</body>
+
+</html>

@@ -1,0 +1,48 @@
+services:
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "ping",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  worldcast-backend:
+    build:
+      context: ./WorldCast-Backend
+      dockerfile: Dockerfile
+    container_name: worldcast-backend
+    image: anhkhoa217/worldcast-backend:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - GCLOUD_PROJECT_ID=velvety-rookery-465515-u1
+      - GCLOUD_PROJECT_LOCATION=us-central1
+      - WEATHER_API_KEY=TRKgIPds6btew6GbitkkXgOwOHmtIoUV
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  worldcast-frontend:
+    build:
+      context: ./WorldCast-Frontend
+      dockerfile: Dockerfile
+    container_name: worldcast-frontend
+    image: anhkhoa217/worldcast-frontend:latest
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_GOOGLE_MAPS_API_KEY=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg
+      - VITE_BACKEND_URL=http://worldcast-backend:8080
