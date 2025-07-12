@@ -98,6 +98,9 @@ Before running the application, you need to configure the following:
 
 - `GET /weather?location={lat,lon}` - Get weather data for a specific location
 
+## Demo
+![Demo](./docs/demo.gif)
+
 ## License
 
 MIT License
