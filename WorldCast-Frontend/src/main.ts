@@ -174,7 +174,7 @@ function geocode(request: google.maps.GeocoderRequest): void {
 
             // Add or update forecast component if available
             if (data.forecast) {
-              const existingForecast = weatherContent.querySelector('.forecast');
+              const existingForecast = weatherContent.querySelector('.forecast-weather');
               const forecastComponent = createForecastComponent(data.forecast);
 
               if (existingForecast) {
@@ -188,6 +188,31 @@ function geocode(request: google.maps.GeocoderRequest): void {
             // Check if we have complete response
             if (checkCompleteResponse(data)) {
               console.log("Complete weather data received");
+              // Update current weather component =
+              if (data.current && data.location) {
+                const existingCurrent = weatherContent.querySelector('.current-weather');
+                const currentWeatherComponent = createCurrentWeatherComponent(data.current, data.location);
+
+                if (existingCurrent) {
+                  existingCurrent.replaceWith(currentWeatherComponent);
+                } else {
+                  weatherContent.appendChild(currentWeatherComponent);
+                }
+              }
+
+              // Update forecast component if available
+              if (data.forecast) {
+                const existingForecast = weatherContent.querySelector('.forecast-weather');
+                const forecastComponent = createForecastComponent(data.forecast);
+
+                if (existingForecast) {
+                  existingForecast.replaceWith(forecastComponent);
+                } else {
+                  weatherContent.appendChild(forecastComponent);
+                  forecastShown = true;
+                }
+              }
+              
               break;
             }
 
@@ -203,7 +228,7 @@ function geocode(request: google.maps.GeocoderRequest): void {
             console.log("Partial data received, continuing to poll for complete response...");
 
             // Wait 2 seconds before next poll
-            await sleep(2000);
+            await sleep(4000);
           }
         } catch (error: any) {
           console.error("Weather data fetch error:", error);

@@ -70,13 +70,14 @@ export function createForecastComponent(forecast: ForecastDay[]): HTMLElement {
     'partly-cloudy': '⛅'
   };
 
-  let forecastHTML = '<h3 style="margin: 0 0 15px 0; color: #2d3436;">📅 7-Day Forecast</h3>';
+  let forecastHTML = '<h3 style="margin: 0 0 15px 0; color: #2d3436;">📅 Daily Forecast</h3>';
 
   forecast.forEach((day, index) => {
     const date = new Date(day.date);
-    const dayLabel = index === 0 ? 'Today' :
-      index === 1 ? 'Tomorrow' :
-        date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const dayLabel = index === 0 ? 'Yesterday' :
+      index === 1 ? 'Today' :
+        index === 2 ? 'Tomorrow' :
+          date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 
     forecastHTML += `
       <div style="
