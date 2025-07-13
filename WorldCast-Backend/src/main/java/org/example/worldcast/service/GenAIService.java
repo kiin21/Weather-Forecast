@@ -11,4 +11,6 @@ public interface GenAIService {
     String generateWeatherSummary(TomorrowIOWeatherResponse.DailyForecast dailyForecast);
 
     CompletableFuture<Void> generateAndCacheSummary(Location location, TomorrowIOWeatherResponse originalResponse);
+
+    String chatWithAI(String message);
 }

@@ -25,12 +25,11 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - GCLOUD_PROJECT_ID=velvety-rookery-465515-u1
-      - GCLOUD_PROJECT_LOCATION=us-central1
+      - SERVER_PORT=8080
+      - GEMINI_API_KEY=your_gemini_api_key_here
       - WEATHER_API_KEY=TRKgIPds6btew6GbitkkXgOwOHmtIoUV
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - GOOGLE_APPLICATION_CREDENTIALS=/app/service-account-key.json
     depends_on:
       redis:
         condition: service_healthy

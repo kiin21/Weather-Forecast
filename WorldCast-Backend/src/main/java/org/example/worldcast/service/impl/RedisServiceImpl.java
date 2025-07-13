@@ -48,6 +48,7 @@ public class RedisServiceImpl implements RedisService {
         redisTemplate.opsForValue().set(cacheKey, weatherResponse, properties.getCache().getTtl(), TimeUnit.SECONDS);
     }
 
+    // Round up latitude and longitude to 2 decimal for avoding cache key of nearby locations.
     private String buildCacheKey(String prefix, Location location) {
         if (location == null || !StringUtils.hasText(location.getName())) {
             throw new IllegalArgumentException("Location must have a valid name");

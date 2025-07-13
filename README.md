@@ -7,7 +7,7 @@ This project is a Spring Boot application called **WorldCast**. It provides weat
 - Fetch current and forecast weather data
 - Geolocation services using OpenStreetMap
 - Integration with TomorrowIO weather API
-- Generate weather descriptions using Google Cloud Vertex AI
+- Generate weather descriptions using GEMINI AI
 - Redis caching for performance optimization
 - Global exception handling
 - Interactive Google Maps interface with resizable weather panel
@@ -18,7 +18,7 @@ This project is a Spring Boot application called **WorldCast**. It provides weat
 ### Backend
 
 - **Spring Boot** - Application framework
-- **Redis** - In-memory caching
+- **Redis** - Caching response data of nearby weather locations
 
 ### Frontend - forked from [WorldCast-Frontend](https://github.com/googlemaps/js-samples/tree/sample-geocoding-simple)
 
@@ -37,7 +37,7 @@ This project is a Spring Boot application called **WorldCast**. It provides weat
 ## Prerequisites
 
 - Docker
-- Google Cloud Platform account (for Vertex AI)
+- Gemini api key
 - TomorrowIO API key
 - Google Maps API key
 
@@ -45,13 +45,10 @@ This project is a Spring Boot application called **WorldCast**. It provides weat
 
 Before running the application, you need to configure the following:
 
-1. **Google Cloud Service Account**
+1. **Create a Gemini API Key**
 
-   - Create a service account in Google Cloud Console
-   - Enable Vertex AI API
-   - Download the service account key JSON file
-   - Place it as `WorldCast-Backend/src/main/resources/service-account-key.json`
-
+   - See at [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
+   - 
 2. **API Keys**
 
    - Get a TomorrowIO API key from [tomorrow.io](https://www.tomorrow.io/)
@@ -59,8 +56,6 @@ Before running the application, you need to configure the following:
 
 3. **Environment Variables**
    - Update the environment variables in `compose.yml`:
-     - `GCLOUD_PROJECT_ID`: Your Google Cloud project ID
-     - `GCLOUD_PROJECT_LOCATION`: Your preferred location (e.g., us-central1)
      - `WEATHER_API_KEY`: Your TomorrowIO API key
      - `VITE_GOOGLE_MAPS_API_KEY`: Your Google Maps API key
 

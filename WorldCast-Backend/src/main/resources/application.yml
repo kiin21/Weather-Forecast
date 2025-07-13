@@ -1,20 +1,18 @@
+server:
+  port: ${SERVER_PORT:8080}
+
 spring:
   application:
     name: WorldCast
 
   ai:
-    model:
-      chat: vertexai
-    vertex:
-      ai:
-        gemini:
-          project-id: ${GCLOUD_PROJECT_ID:velvety-rookery-465515-u1}
-          location: ${GCLOUD_PROJECT_LOCATION:us-central1}
-          chat:
-            options:
-              model: gemini-2.5-flash-preview-04-17
-              google-search-retrieval: true
-              temperature: 1.0
+    openai:
+        api-key: ${GEMINI_API_KEY}
+        chat:
+          base-url: https://generativelanguage.googleapis.com
+          completions-path: /v1beta/openai/chat/completions
+          options:
+            model: gemini-2.5-flash
 
   jackson:
     serialization:
@@ -24,13 +22,13 @@ spring:
 
   data:
     redis:
-      host: ${REDIS_HOST:redis}
+      host: ${REDIS_HOST:localhost}
       port: ${REDIS_PORT:6379}
       database: 0
       timeout: 2000ms
 
 weather:
-  api-key: ${WEATHER_API_KEY:TRKgIPds6btew6GbitkkXgOwOHmtIoUV}
+  api-key: ${WEATHER_API_KEY}
   cache:
     prefix: worldcast
     ttl: 300 # 5 minutes

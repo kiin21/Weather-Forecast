@@ -6,13 +6,13 @@ import org.example.worldcast.domain.dto.response.TomorrowIOWeatherResponse;
 import org.example.worldcast.domain.dto.response.WeatherResponse;
 import org.example.worldcast.service.GenAIService;
 import org.example.worldcast.service.RedisService;
-import org.springframework.ai.chat.model.ChatModel;
-import org.springframework.ai.chat.model.ChatResponse;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.chat.messages.SystemMessage;
+import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -20,31 +20,35 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class GenAIServiceImpl implements GenAIService {
 
-    private final ChatModel chatModel;
+    private final ChatClient chatClient;
     private final RedisService redisService;
-
+    private final String systemMessage = """
+            You are a helpful AI assistant that generates weather summaries based on provided data.
+            Your responses should be concise, friendly, and easy to understand.
+            Always use the date provided in the data for daily forecasts, never mention the day of the week.
+            """;
 
     // Template for minute forecast
     private static final String MINUTE_PROMPT_TEMPLATE = """
-        Generate a concise and easy-to-understand weather summary for the following minute forecast:
-        
-        Data: {weatherforecast}
-        
-        Please write 1-2 sentences describing the current weather in a natural and friendly way.
-        """;
+            Generate a concise and easy-to-understand weather summary for the following minute forecast:
+            
+            Data: {weatherforecast}
+            
+            Please write 1-2 sentences describing the current weather in a natural and friendly way.
+            """;
 
     // Template for daily forecast
     private static final String DAILY_PROMPT_TEMPLATE = """
-        Generate a weather summary for the following day:
-        
-        Data: {weatherforecast}
-        
-        Please write 2-3 sentences describing the weather for the day in a vivid and helpful way, never include the day, use the date provided in data instead.
-        """;
+            Generate a weather summary for the following day:
+            
+            Data: {weatherforecast}
+            
+            Please write 2-3 sentences describing the weather for the day in a vivid and helpful way, never include the day, use the date provided in data instead.
+            """;
 
-    @Autowired
-    public GenAIServiceImpl(ChatModel chatModel, RedisService redisService) {
-        this.chatModel = chatModel;
+
+    public GenAIServiceImpl(ChatClient.Builder builder, RedisService redisService) {
+        this.chatClient = builder.build();
         this.redisService = redisService;
     }
 
@@ -55,18 +59,14 @@ public class GenAIServiceImpl implements GenAIService {
             PromptTemplate promptTemplate = new PromptTemplate(MINUTE_PROMPT_TEMPLATE);
 
             // Prepare data for template - pass entire forecast object
-            Map<String, Object> promptVariables = Map.of(
-                    "weatherforecast", minuteForecast.toString()
+            Map<String, Object> promptVariables = Map.of("weatherforecast", minuteForecast.toString()
             );
 
             // Create prompt from template
-            Prompt prompt = promptTemplate.create(promptVariables);
-
-            // Call AI model
-            ChatResponse response = chatModel.call(prompt);
+            Prompt prompt = promptTemplate.create(promptVariables).augmentSystemMessage(systemMessage);
 
             // Get content from response
-            return response.getResult().getOutput().getText();
+            return chatClient.prompt(prompt).call().content();
 
         } catch (Exception e) {
             // Log error and return fallback message
@@ -82,18 +82,14 @@ public class GenAIServiceImpl implements GenAIService {
             PromptTemplate promptTemplate = new PromptTemplate(DAILY_PROMPT_TEMPLATE);
 
             // Prepare data for template - pass entire forecast object
-            Map<String, Object> promptVariables = Map.of(
-                    "weatherforecast", dailyForecast.toString()
+            Map<String, Object> promptVariables = Map.of("weatherforecast", dailyForecast.toString()
             );
 
             // Create prompt from template
-            Prompt prompt = promptTemplate.create(promptVariables);
+            Prompt prompt = promptTemplate.create(promptVariables).augmentSystemMessage(systemMessage);
 
             // Call AI model
-            ChatResponse response = chatModel.call(prompt);
-
-            // Get content from response
-            return response.getResult().getOutput().getText();
+            return chatClient.prompt(prompt).call().content();
 
         } catch (Exception e) {
             return null;
@@ -139,5 +135,15 @@ public class GenAIServiceImpl implements GenAIService {
             System.err.println("Error in async AI processing: " + e.getMessage());
             return CompletableFuture.failedFuture(e);
         }
+    }
+
+    @Override
+    public String chatWithAI(String message) {
+        Prompt prompt = new Prompt(new SystemMessage("You are Khoa's latest AI model"), new UserMessage(message));
+
+        return chatClient
+                .prompt(prompt)
+                .call()
+                .content();
     }
 }
