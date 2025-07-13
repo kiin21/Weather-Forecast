@@ -10,5 +10,6 @@ FROM eclipse-temurin:21-jdk
 VOLUME /tmp
 WORKDIR /app
 COPY --from=builder /app/target/*.jar app.jar
+COPY src/main/resources/service-account-key.json /app/service-account-key.json
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]

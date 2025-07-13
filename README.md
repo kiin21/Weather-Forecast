@@ -37,7 +37,7 @@ This project is a Spring Boot application called **WorldCast**. It provides weat
 ## Prerequisites
 
 - Docker
-- Gemini api key
+- Gemini API key
 - TomorrowIO API key
 - Google Maps API key
 
@@ -45,37 +45,47 @@ This project is a Spring Boot application called **WorldCast**. It provides weat
 
 Before running the application, you need to configure the following:
 
-1. **Create a Gemini API Key**
+1. **Get API Keys**
 
-   - See at [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
-   - 
-2. **API Keys**
+   - **Gemini AI API Key**: Get from [Google AI Studio](https://aistudio.google.com/apikey)
+   - Pass the key as an environment variable `GEMINI_API_KEY` in `compose.yml`
 
-   - Get a TomorrowIO API key from [tomorrow.io](https://www.tomorrow.io/)
-   - Get a Google Maps API key from [Google Cloud Console](https://console.cloud.google.com/)
+   - **TomorrowIO API Key**: Get from [tomorrow.io](https://www.tomorrow.io/)
+   - Pass the key as an environment variable `WEATHER_API_KEY` in `compose.yml`
 
-3. **Environment Variables**
-   - Update the environment variables in `compose.yml`:
-     - `WEATHER_API_KEY`: Your TomorrowIO API key
-     - `VITE_GOOGLE_MAPS_API_KEY`: Your Google Maps API key
+   - **Google Maps API Key**: Get from [Google Cloud Console](https://console.cloud.google.com/)
+   - Pass the key as an environment variable `VITE_GOOGLE_MAPS_API_KEY` in `compose.yml`
 
-## How to Run with Docker
+2. **Authenticate with Google Cloud (for Gemini AI)**
+
+   ```bash
+   gcloud auth application-default login
+   ```
+
+## Run with Docker
 
 1. **Clone the repository**
 
-   ```sh
+   ```bash
    git clone https://github.com/kiin21/Weather-Forecast
    cd WorldCast
    ```
 
-2. **Configure the application**
+2. **Copy credential file to source code**
 
-   - Place your service account key in `WorldCast-Backend/src/main/resources/service-account-key.json`
-   - Update the environment variables in `compose.yml` with your actual API keys and project details
+   ```bash
+   # On MacOS/Linux
+   cp $HOME/.config/gcloud/application_default_credentials.json WorldCast-Backend/src/main/resources/service-account-key.json
+
+   # On Windows
+   copy %APPDATA%\gcloud\application_default_credentials.json WorldCast-Backend\src\main\resources\service-account-key.json
+   ```
+
+   Ensure the file is named `service-account-key.json` and placed in the `src/main/resources` directory of the backend project.
 
 3. **Start with Docker Compose**
 
-   ```sh
+   ```bash
    docker-compose up -d
    ```
 
@@ -94,6 +104,7 @@ Before running the application, you need to configure the following:
 - `GET /weather?location={lat,lon}` - Get weather data for a specific location
 
 ## Demo
+
 ![Demo](./docs/demo.gif)
 
 ## License
