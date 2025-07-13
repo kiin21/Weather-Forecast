@@ -30,7 +30,7 @@ This project is a Spring Boot application called **WorldCast**. It provides weat
 ### External Services & APIs
 
 - **TomorrowIO API** - Weather data provider
-- **Google Cloud Vertex AI** - AI-powered weather descriptions
+- **Google Gemini AI** - AI-powered weather descriptions
 - **OpenStreetMap** - Geolocation services
 - **Google Maps API** - Map visualization
 
