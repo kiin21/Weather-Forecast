@@ -60,7 +60,6 @@ public class TomorrowIOWeatherResponse {
         private HourlyValues values;
     }
 
-
     @EqualsAndHashCode(callSuper = true)
     @Data
     public static class HourlyValues extends MinuteValues {
@@ -81,7 +80,6 @@ public class TomorrowIOWeatherResponse {
         private String time;
         private DailyValues values;
     }
-
 
     @Data
     public static class DailyValues {
@@ -185,5 +183,3 @@ public class TomorrowIOWeatherResponse {
         private double windSpeedMin;
     }
 }
-
-

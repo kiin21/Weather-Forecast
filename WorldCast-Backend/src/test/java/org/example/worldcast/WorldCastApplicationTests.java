@@ -9,5 +9,4 @@ class WorldCastApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }

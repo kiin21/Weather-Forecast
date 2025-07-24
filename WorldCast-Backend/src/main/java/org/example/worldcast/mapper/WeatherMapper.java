@@ -14,14 +14,15 @@ import java.util.List;
 public class WeatherMapper {
 
     public CurrentWeather mapToCurrentWeather(TomorrowIOWeatherResponse response) {
-        if (response.getTimelines() == null ||
-                response.getTimelines().getHourly() == null ||
-                response.getTimelines().getHourly().isEmpty()) {
+        if (response.getTimelines() == null
+                || response.getTimelines().getHourly() == null
+                || response.getTimelines().getHourly().isEmpty()) {
             throw new RuntimeException("No current weather data available");
         }
 
         // Use the first minutely forecast as current weather
-        TomorrowIOWeatherResponse.MinuteForecast firstHourly = response.getTimelines().getMinutely().getFirst();
+        TomorrowIOWeatherResponse.MinuteForecast firstHourly =
+                response.getTimelines().getMinutely().getFirst();
         TomorrowIOWeatherResponse.MinuteValues values = firstHourly.getValues();
 
         CurrentWeather current = new CurrentWeather();
@@ -39,12 +40,12 @@ public class WeatherMapper {
     public List<ForecastWeather> mapToForecastWeather(TomorrowIOWeatherResponse response) {
         List<ForecastWeather> forecastList = new ArrayList<>();
 
-        if (response.getTimelines() == null ||
-                response.getTimelines().getDaily() == null) {
+        if (response.getTimelines() == null || response.getTimelines().getDaily() == null) {
             return forecastList;
         }
 
-        for (TomorrowIOWeatherResponse.DailyForecast dailyForecast : response.getTimelines().getDaily()) {
+        for (TomorrowIOWeatherResponse.DailyForecast dailyForecast :
+                response.getTimelines().getDaily()) {
             TomorrowIOWeatherResponse.DailyValues values = dailyForecast.getValues();
 
             ForecastWeather forecast = new ForecastWeather();

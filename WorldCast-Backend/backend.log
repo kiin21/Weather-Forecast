@@ -1,0 +1,87 @@
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for org.example:WorldCast:jar:0.0.1-SNAPSHOT
+[WARNING] 'dependencies.dependency.(groupId:artifactId:type:classifier)' must be unique: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar -> duplicate declaration of version (?) @ line 118, column 21
+[WARNING] 'dependencies.dependency.scope' for org.springframework.cloud:spring-cloud-dependencies:pom must be one of [provided, compile, runtime, test, system] but is 'import'. @ line 71, column 20
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] 
+[INFO] -----------------------< org.example:WorldCast >------------------------
+[INFO] Building WorldCast 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.3:run (default-cli) > test-compile @ WorldCast >>>
+[INFO] 
+[INFO] --- spotless:2.43.0:check (default) @ WorldCast ---
+[INFO] Spotless.Java is keeping 30 files clean - 30 needs changes to be clean, 0 were already clean, 0 were skipped because caching determined they were already clean
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  2.288 s
+[INFO] Finished at: 2025-07-24T23:09:50+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal com.diffplug.spotless:spotless-maven-plugin:2.43.0:check (default) on project WorldCast: The following files had format violations:
+[ERROR]     src/test/java/org/example/worldcast/WorldCastApplicationTests.java
+[ERROR]         @@ -6,7 +6,6 @@
+[ERROR]          @SpringBootTest
+[ERROR]          class·WorldCastApplicationTests·{
+[ERROR]          
+[ERROR]         -····@Test
+[ERROR]         -····void·contextLoads()·{
+[ERROR]         -····}
+[ERROR]         +··@Test
+[ERROR]         +··void·contextLoads()·{}
+[ERROR]          }
+[ERROR]     src/main/java/org/example/worldcast/service/RedisService.java
+[ERROR]         @@ -5,7 +5,7 @@
+[ERROR]          
+[ERROR]          public·interface·RedisService·{
+[ERROR]          
+[ERROR]         -····WeatherResponse·getWeatherFromCache(Location·location);
+[ERROR]         +··WeatherResponse·getWeatherFromCache(Location·location);
+[ERROR]          
+[ERROR]         -····void·cacheWeatherData(Location·location,·WeatherResponse·weatherResponse);
+[ERROR]         +··void·cacheWeatherData(Location·location,·WeatherResponse·weatherResponse);
+[ERROR]          }
+[ERROR]     src/main/java/org/example/worldcast/service/GenAIService.java
+[ERROR]         @@ -1,23 +1,22 @@
+[ERROR]          package·org.example.worldcast.service;
+[ERROR]          
+[ERROR]         +import·java.util.concurrent.CompletableFuture;
+[ERROR]          import·org.example.worldcast.domain.dto.common.Location;
+[ERROR]          import·org.example.worldcast.domain.dto.response.TomorrowIOWeatherResponse;
+[ERROR]          import·org.example.worldcast.domain.dto.response.WeatherResponse;
+[ERROR]          import·reactor.core.publisher.Flux;
+[ERROR]          
+[ERROR]         -import·java.util.concurrent.CompletableFuture;
+[ERROR]         -
+[ERROR]          public·interface·GenAIService·{
+[ERROR]         -····String·generateWeatherSummary(TomorrowIOWeatherResponse.MinuteForecast·minuteForecast);
+[ERROR]         +··String·generateWeatherSummary(TomorrowIOWeatherResponse.MinuteForecast·minuteForecast);
+[ERROR]          
+[ERROR]         -····String·generateWeatherSummary(TomorrowIOWeatherResponse.DailyForecast·dailyForecast);
+[ERROR]         +··String·generateWeatherSummary(TomorrowIOWeatherResponse.DailyForecast·dailyForecast);
+[ERROR]          
+[ERROR]         -····String·chatWithAI(String·message);
+[ERROR]         +··String·chatWithAI(String·message);
+[ERROR]          
+[ERROR]         -····Flux<String>·chatWithAIStream(String·message);
+[ERROR]         +··Flux<String>·chatWithAIStream(String·message);
+[ERROR]          
+[ERROR]         -····CompletableFuture<WeatherResponse>·generateAndCacheAIDescriptions(
+[ERROR]         -············Location·location,
+[ERROR]         -············TomorrowIOWeatherResponse·originalResponse,
+[ERROR]     ... (6 more lines that didn't fit)
+[ERROR] Violations also present in 27 other files.
+[ERROR] Run 'mvn spotless:apply' to fix these violations.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

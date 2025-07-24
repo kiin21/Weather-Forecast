@@ -62,6 +62,15 @@ Before running the application, you need to configure the following:
    gcloud auth application-default login
    ```
 
+## Run Locally
+
+Make sure you have redis on your machine on port 6379.
+
+``` shell
+chmod +x run.sh
+./run.sh
+```
+
 ## Run with Docker
 
 1. **Clone the repository**
@@ -106,6 +115,9 @@ Before running the application, you need to configure the following:
 ## Demo
 
 ![Demo](./docs/demo.gif)
+
+## New features
+
 
 ## License
 

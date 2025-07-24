@@ -15,14 +15,12 @@ public interface OpenStreetMapClient {
             @RequestParam("format") String format,
             @RequestParam("q") String query,
             @RequestParam("limit") int limit,
-            @RequestParam("addressdetails") int addressDetails
-    );
+            @RequestParam("addressdetails") int addressDetails);
 
     @GetMapping("/reverse")
     OpenStreetMapResponse getReverseLocation(
             @RequestParam("format") String format,
             @RequestParam("lat") double latitude,
             @RequestParam("lon") double longitude,
-            @RequestParam("addressdetails") int addressDetails
-    );
+            @RequestParam("addressdetails") int addressDetails);
 }

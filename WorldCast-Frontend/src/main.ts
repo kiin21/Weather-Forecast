@@ -9,12 +9,14 @@ import { createCurrentWeatherComponent, createForecastComponent } from './compon
 import { initResizablePanel } from './components/ResizablePanel.js';
 import { toggleDescription, sleep } from './utils/textUtils.js';
 import { WeatherData } from './types/weather.js';
+import { ChatBot } from './components/ChatBot.js';
 
 let map: google.maps.Map;
 let marker: google.maps.Marker;
 let geocoder: google.maps.Geocoder;
 let weatherPanel: HTMLDivElement;
 let weatherContent: HTMLDivElement;
+let chatBot: ChatBot;
 
 export function initMap(): void {
   map = new google.maps.Map(document.getElementById("map") as HTMLElement, {
@@ -27,6 +29,11 @@ export function initMap(): void {
   // Get weather panel elements
   weatherPanel = document.getElementById("weather-panel") as HTMLDivElement;
   weatherContent = document.getElementById("weather-content") as HTMLDivElement;
+
+  // Initialize chatbot after a short delay to ensure DOM is ready
+  setTimeout(() => {
+    chatBot = new ChatBot();
+  }, 100);
 
   // Initialize resizable panel
   initResizablePanel(weatherPanel);
@@ -187,8 +194,11 @@ function geocode(request: google.maps.GeocoderRequest): void {
 
             // Check if we have complete response
             if (checkCompleteResponse(data)) {
+              // Notify chatbot about weather update
+              chatBot.sendWeatherUpdate(locationName, data);
+
               console.log("Complete weather data received");
-              // Update current weather component =
+              // Update current weather component
               if (data.current && data.location) {
                 const existingCurrent = weatherContent.querySelector('.current-weather');
                 const currentWeatherComponent = createCurrentWeatherComponent(data.current, data.location);
@@ -212,7 +222,7 @@ function geocode(request: google.maps.GeocoderRequest): void {
                   forecastShown = true;
                 }
               }
-              
+
               break;
             }
 

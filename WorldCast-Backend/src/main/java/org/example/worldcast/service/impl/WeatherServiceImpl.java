@@ -10,25 +10,31 @@ import org.example.worldcast.service.GenAIService;
 import org.example.worldcast.service.GeoService;
 import org.example.worldcast.service.RedisService;
 import org.example.worldcast.service.WeatherService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 @Service("weatherService")
 public class WeatherServiceImpl implements WeatherService {
-    private final TomorrowIOClient tomorrowIOClient;
+    private static final Logger logger = LoggerFactory.getLogger(WeatherServiceImpl.class);
 
+    private final TomorrowIOClient tomorrowIOClient;
     private final GeoService geoService;
     private final RedisService redisService;
     private final GenAIService genAIService;
-
     private final WeatherMapper weatherMapper;
     private final ApplicationProperties applicationProperties;
-
 
     public WeatherServiceImpl(
             TomorrowIOClient tomorrowIOClient,
             GeoService geoService,
             WeatherMapper weatherMapper,
-            RedisService redisService, GenAIService genAIService, ApplicationProperties applicationProperties) {
+            RedisService redisService,
+            GenAIService genAIService,
+            ApplicationProperties applicationProperties) {
         this.tomorrowIOClient = tomorrowIOClient;
         this.geoService = geoService;
         this.weatherMapper = weatherMapper;
@@ -37,46 +43,53 @@ public class WeatherServiceImpl implements WeatherService {
         this.applicationProperties = applicationProperties;
     }
 
+    @Tool(description = "Fetches weather data by location name or coordinates")
     @Override
+    @Cacheable(value = "weather-cache", key = "#location", unless = "#result == null")
     public WeatherResponse getWeatherByLocation(String location) {
         try {
             Location parsedLocation = parseLocation(location);
-            // Check cache first
-            WeatherResponse cachedResponse = redisService.getWeatherFromCache(parsedLocation);
-            if (cachedResponse != null) {
-                return cachedResponse;
-            }
-
-            // Cache miss - fetch from API and cache the result
-            System.out.println("Cache miss for location: " + parsedLocation.toString());
-            return fetchAndCacheWeatherFromAPI(parsedLocation);
+            logger.info("Cache miss for location: {}, fetching from API", parsedLocation.toString());
+            return fetchWeatherFromAPI(parsedLocation);
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch weather data: " + e.getMessage(), e);
         }
     }
 
-    private WeatherResponse fetchAndCacheWeatherFromAPI(Location location) {
-        String locationParam = location.getLat() + "," + location.getLon();
-
-        // Call weather API
-        TomorrowIOWeatherResponse response = tomorrowIOClient.getWeatherForecast(locationParam, applicationProperties.getApiKey());
-
-        WeatherResponse weatherResponse = WeatherResponse.builder()
-                .location(location)
-                .current(weatherMapper.mapToCurrentWeather(response))
-                .forecast(weatherMapper.mapToForecastWeather(response))
-                .build();
-
-        // Cache immediately with basic data
-        redisService.cacheWeatherData(location, weatherResponse);
-
-        // Async: Generate AI descriptions and update cache
-        genAIService.generateAndCacheSummary(location, response);
-
-        // Return immediately (without AI descriptions)
-        return weatherResponse;
+    @CacheEvict(value = "weather-cache", key = "#location")
+    public void evictCache(String location) {
+        logger.info("Cache evicted for location: {}", location);
     }
 
+    @CacheEvict(value = "weather-cache", allEntries = true)
+    public void evictAllCache() {
+        logger.info("All weather cache evicted");
+    }
+
+    private WeatherResponse fetchWeatherFromAPI(Location location) {
+        String locationParam = location.getLat() + "," + location.getLon();
+
+        try {
+            // Call weather API
+            TomorrowIOWeatherResponse response =
+                    tomorrowIOClient.getWeatherForecast(locationParam, applicationProperties.getApiKey());
+
+            WeatherResponse weatherResponse =
+                    WeatherResponse.builder()
+                            .location(location)
+                            .current(weatherMapper.mapToCurrentWeather(response))
+                            .forecast(weatherMapper.mapToForecastWeather(response))
+                            .build();
+
+            // Async: Generate AI descriptions
+            genAIService.generateAndCacheAIDescriptions(location, response, weatherResponse);
+
+            return weatherResponse;
+        } catch (Exception e) {
+            logger.error("Error fetching weather data from tomorrowIO for location {}: {}", location, e.getMessage());
+            throw new RuntimeException("Error on calling tomorrowIO API: " + e.getMessage(), e);
+        }
+    }
 
     private Location parseLocation(String location) {
         // Check if the location string is in "lat,lon" format
